@@ -15,10 +15,24 @@ if (!existsSync(indexPath)) {
 
 let html = readFileSync(indexPath, 'utf8');
 
-// Find JS and CSS files in dist
+// Find JS and CSS files in dist (check both root and assets directory)
 const files = readdirSync(distDir);
-const jsFile = files.find(f => f.endsWith('.js') && !f.includes('legacy'));
-const cssFile = files.find(f => f.endsWith('.css'));
+const assetsDir = resolve(distDir, 'assets');
+const hasAssetsDir = existsSync(assetsDir);
+
+let jsFile = null;
+let cssFile = null;
+
+if (hasAssetsDir) {
+  const assetFiles = readdirSync(assetsDir);
+  jsFile = assetFiles.find(f => f.endsWith('.js') && !f.includes('legacy'));
+  cssFile = assetFiles.find(f => f.endsWith('.css'));
+  if (jsFile) jsFile = `assets/${jsFile}`;
+  if (cssFile) cssFile = `assets/${cssFile}`;
+} else {
+  jsFile = files.find(f => f.endsWith('.js') && !f.includes('legacy'));
+  cssFile = files.find(f => f.endsWith('.css'));
+}
 
 // Get the base URL from environment variable or use a placeholder
 // This should be set to where you'll host the widget files (e.g., GitHub Pages, Vercel, etc.)
@@ -26,13 +40,15 @@ const baseUrl = process.env.WIDGET_BASE_URL || 'https://your-widget-domain.com';
 
 // Update script and link tags to use absolute URLs
 if (jsFile) {
+  // Match script tags with src attributes
   html = html.replace(
     /<script[^>]*src="[^"]*"[^>]*><\/script>/g,
-    `<script type="module" src="${baseUrl}/${jsFile}"></script>`
+    `<script type="module" crossorigin src="${baseUrl}/${jsFile}"></script>`
   );
 }
 
 if (cssFile) {
+  // Match link tags with rel="stylesheet"
   html = html.replace(
     /<link[^>]*rel="stylesheet"[^>]*>/g,
     `<link rel="stylesheet" href="${baseUrl}/${cssFile}">`
