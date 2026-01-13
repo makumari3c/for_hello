@@ -6,12 +6,12 @@ export default defineConfig({
    base: '/for_hello/',
   build: {
     outDir: 'dist',
-    cssCodeSplit: false,
-    rollupOptions: {
-      output: {
-        inlineDynamicImports: true,
-      },
-    },
+    // cssCodeSplit: false,
+    // rollupOptions: {
+    //   output: {
+    //     inlineDynamicImports: true,
+    //   },
+    // },
   },
   server: {
     port: 3000,
